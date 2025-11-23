@@ -130,7 +130,7 @@
 
     function updateSelection(participant) {
         console.log(participant);
-        authenticated = participant == selectedParticipant;
+        authenticated = false;
         selectedParticipant = participant;
         render();
         scrollDown();

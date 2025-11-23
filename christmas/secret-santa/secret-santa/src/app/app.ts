@@ -95,7 +95,7 @@ export class App implements OnInit {
   }
 
   updateSelection(participant: string) {
-    this.authenticated = participant == this.selectedParticipant();
+    this.authenticated = false;
     this.selectedParticipant.set(participant);
     this.scrollDown();
   }
