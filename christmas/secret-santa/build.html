@@ -63,8 +63,8 @@
         Mariana: ["Jon"],
         Tom: ["Sabina"],
         Sabina: ["Tom"],
-        Ida: [],
-        Sebastian: [],
+        Ida: ["Sebastian"],
+        Sebastian: ["Ida"],
         Kris: ["Marta"],
         Marta: ["Kris"],
         Mamma: ["Pappa"],
@@ -95,7 +95,7 @@
         combinedMax: BUDGET * drawsPerParticipant + BUDGET_MARGIN,
     }
 
-    const RANDOM_STATE = { seed: new Date().getFullYear() };
+    const RANDOM_STATE = { seed: new Date().getFullYear() + 1 };
     const draws = {};
     let authenticated = false;
 
@@ -192,18 +192,16 @@
         const data = selectedParticipantData();
 
         // Clear and populate participant list
-        DOM.listContainer.innerHTML = "";
+        DOM.listContainer.innerHTML = "<p>Who are you?</p>";
         for (let i in PARTICIPANTS) {
             const b = document.createElement("p");
-            b.innerText = PARTICIPANTS[i];
+            b.innerText = PARTICIPANTS[i] + (PARTICIPANTS[i] == selectedParticipant ? " ✔" : "");
             b.classList.add("button");
             b.onclick = ((i) => { return () => updateSelection(PARTICIPANTS[i]) })(i);
             if (i % 2 === 1) b.classList.add("odd");
 
             DOM.listContainer.appendChild(b);
         }
-
-        console.log("rendering", data, data !== null && Boolean(data.name));
 
         // Update display states
         DOM.selectionInfo.style.display = (data.name !== "") ? "block" : "none";
