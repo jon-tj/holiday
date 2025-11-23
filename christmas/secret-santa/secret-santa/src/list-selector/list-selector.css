@@ -1,0 +1,35 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.icon {
+    visibility: hidden;
+}
+
+.selected {
+    visibility: visible;
+}
+
+p.button {
+    padding: 1rem;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    background-color: #ee7878;
+    color: #333;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    outline: 1px solid #aaa;
+    margin: 0.5rem 0;
+}
+
+p.button.odd {
+    background-color: #80b85b;
+}
+
+p.button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}

@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Secret Santa</title>
+    <base href="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/9120/9120827.png">
+</head>
+
+<body>
+    <div class="participant-container">
+        <app-list-selector [items]="PARTICIPANTS" [title]="'Who are you?'" (selectedItem)="updateSelection($event)"
+            class="participant-selector">
+        </app-list-selector>
+
+        <div class="selection-info">
+            <div class="auth">
+
+                <p class="participant-name"><strong id="pname"></strong></p>
+                <p>will gift to:</p>
+                <ul id="gifters-container">
+                </ul>
+
+                <div class="budget-box">
+                    <p>Budget is <strong id="b-perGift"></strong>.</p>
+                    <p>This means you can spend between <span id="b-perGiftMin"></span> and <span
+                            id="b-perGiftMax"></span> on
+                        one gift.</p>
+                    <p>The combined value should not exceed <strong id="b-combinedMax"></strong>.
+                    </p>
+                </div>
+            </div>
+
+            <div class="auth-box">
+                <p>What's your favorite fruit?</p>
+                <input type="password" onkeydown="typeAuthField(event)" placeholder="Type here..." />
+            </div>
+        </div>
+    </div>
+
+    <img src="https://cdn-icons-png.flaticon.com/512/9120/9120827.png" alt="presents" class="">
+</body>
+
+<script>
+    let selectedParticipant = "";
+    const PARTICIPANTS = [
+        "Jon",
+        "Mariana",
+        "Tom",
+        "Sabina",
+        "Ida",
+        "Sebastian",
+        "Kris",
+        "Marta",
+        "Mamma",
+        "Pappa",
+    ]
+
+    const excludeList = {
+        Jon: ["Mariana"],
+        Mariana: ["Jon"],
+        Tom: ["Sabina"],
+        Sabina: ["Tom"],
+        Ida: [],
+        Sebastian: [],
+        Kris: ["Marta"],
+        Marta: ["Kris"],
+        Mamma: ["Pappa"],
+        Pappa: ["Mamma"],
+    }
+
+    const fruits = {
+        Jon: "banan",
+        Mariana: "grape",
+        Tom: "ananas",
+        Sabina: "apple",
+        Ida: "kirsebær",
+        Sebastian: "jordbær",
+        Kris: "banan",
+        Marta: "kiwi",
+        Mamma: "eple",
+        Pappa: "sitron"
+    }
+
+    const drawsPerParticipant = 2;
+
+    const BUDGET = 200;
+    const BUDGET_MARGIN = 50;
+    const BUDGET_DETAILS = {
+        perGift: BUDGET,
+        perGiftMax: BUDGET + BUDGET_MARGIN,
+        perGiftMin: BUDGET - BUDGET_MARGIN,
+        combinedMax: BUDGET * drawsPerParticipant + BUDGET_MARGIN,
+    }
+
+    const RANDOM_STATE = { seed: new Date().getFullYear() };
+    const draws = {};
+    let authenticated = false;
+
+    function selectedParticipantData() {
+        return {
+            name: selectedParticipant,
+            authenticated: authenticated,
+            gifters: authenticated ? draws[selectedParticipant] ?? [] : []
+        }
+    }
+
+
+    function ngOnInit() {
+        for (let participant of PARTICIPANTS) {
+            draws[participant] = [];
+        }
+
+        for (let participant of PARTICIPANTS) {
+            let candidateGifters = PARTICIPANTS.filter(p => (
+                draws[p].length < drawsPerParticipant
+                && p != participant
+                && !excludeList[participant].includes(p)));
+            let gifters = shuffle(candidateGifters, RANDOM_STATE).splice(0, drawsPerParticipant);
+            for (let gifter of gifters)
+                draws[gifter].push(participant);
+        }
+
+        for (let participant of PARTICIPANTS) {
+            draws[participant].sort();
+        }
+    }
+
+    function updateSelection(participant) {
+        console.log(participant);
+        authenticated = participant == selectedParticipant;
+        selectedParticipant = participant;
+        render();
+        scrollDown();
+    }
+
+    function scrollDown() {
+        // Wait for new content to be loaded
+        setTimeout(() => {
+            window.scrollTo({
+                top: document.body.scrollHeight,
+                behavior: 'smooth' // smooth scrolling
+            });
+        }, 1);
+    }
+
+    function typeAuthField(event) {
+        if (event.key === 'Enter') {
+            const query = event.target.value;
+            event.target.value = "";
+            const pwd = fruits[selectedParticipant];
+            authenticated = query.toLowerCase() == pwd.toLowerCase();
+            render();
+            if (authenticated) {
+                scrollDown();
+            }
+        }
+    }
+
+    function randint(a, b, state) {
+        // xorshift32
+        let x = state.seed |= 0;
+        x ^= x << 13;
+        x ^= x >>> 17;
+        x ^= x << 5;
+        state.seed = x >>> 0;   // store updated seed (ensure uint32)
+        return a + (state.seed % (b - a + 1));
+    }
+
+    function shuffle(collection, state) {
+        return structuredClone(collection).sort((_, __) => randint(0, 1, state) * 2 - 1);
+    }
+
+
+    // Cache all DOM elements in a single constant object
+    const DOM = {
+        listContainer: document.querySelector("app-list-selector"),
+        selectionInfo: document.querySelector(".selection-info"),
+        authBox: document.querySelector(".auth-box"),
+        auth: document.querySelector(".auth"),
+        pname: document.querySelector("#pname"),
+        bPerGift: document.querySelector("#b-perGift"),
+        bPerGiftMax: document.querySelector("#b-perGiftMax"),
+        bPerGiftMin: document.querySelector("#b-perGiftMin"),
+        bCombinedMax: document.querySelector("#b-combinedMax"),
+        giftersContainer: document.querySelector("#gifters-container")
+    };
+
+    function render() {
+        const data = selectedParticipantData();
+
+        // Clear and populate participant list
+        DOM.listContainer.innerHTML = "";
+        for (let i in PARTICIPANTS) {
+            const b = document.createElement("p");
+            b.innerText = PARTICIPANTS[i];
+            b.classList.add("button");
+            b.onclick = ((i) => { return () => updateSelection(PARTICIPANTS[i]) })(i);
+            if (i % 2 === 1) b.classList.add("odd");
+
+            DOM.listContainer.appendChild(b);
+        }
+
+        console.log("rendering", data, data !== null && Boolean(data.name));
+
+        // Update display states
+        DOM.selectionInfo.style.display = (data.name !== "") ? "block" : "none";
+        DOM.authBox.style.display = (!authenticated) ? "block" : "none";
+        DOM.auth.style.display = (authenticated) ? "block" : "none";
+
+        // Update participant info
+        DOM.pname.innerText = data.name;
+        DOM.bPerGift.innerHTML = BUDGET_DETAILS.perGift + "&nbsp;kr";
+        DOM.bPerGiftMax.innerHTML = BUDGET_DETAILS.perGiftMax + "&nbsp;kr";
+        DOM.bPerGiftMin.innerHTML = BUDGET_DETAILS.perGiftMin + "&nbsp;kr";
+        DOM.bCombinedMax.innerHTML = BUDGET_DETAILS.combinedMax + "&nbsp;kr";
+
+        // Render gifters
+        DOM.giftersContainer.innerHTML = data.gifters.map(g => `<li><strong>${g}</strong></li>`).join("");
+    }
+
+
+    ngOnInit();
+    render();
+</script>
+<style>
+    .icon {
+        visibility: hidden;
+    }
+
+    .selected {
+        visibility: visible;
+    }
+
+    p.button {
+        padding: 1rem;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        background-color: #ee7878;
+        color: #333;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.25s ease, box-shadow 0.25s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        outline: 1px solid #aaa;
+        margin: 0.5rem 0;
+    }
+
+    p.button.odd {
+        background-color: #80b85b;
+    }
+
+    p.button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    .participant-container {
+        display: flex;
+        align-items: flex-start;
+        gap: 2rem;
+        margin-top: 2rem;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+        flex-wrap: wrap;
+        /* allows wrapping on smaller screens */
+    }
+
+    /* Selector styling */
+    .participant-selector {
+        width: 20rem;
+    }
+
+    .participant-selector,
+    .selection-info {
+        background-color: #fdfdfd;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .selection-info {
+        flex: 1;
+    }
+
+    .selection-info p {
+        margin: 0.5rem 0;
+        line-height: 1.5;
+    }
+
+    .selection-info ul {
+        padding-left: 1.5rem;
+        margin: 0.5rem 0 1rem 0;
+    }
+
+    .selection-info li {
+        list-style-type: disc;
+        margin-bottom: 0.3rem;
+    }
+
+    /* Participant name styling */
+    .participant-name {
+        font-size: 1.2rem;
+        color: #222;
+    }
+
+    /* Budget box styling */
+    .budget-box {
+        background-color: #e8f0fe;
+        border-left: 4px solid #3b82f6;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-top: 1rem;
+    }
+
+    /* Auth box styling */
+    .auth-box input {
+        width: 100%;
+        padding: 0.5rem 0.7rem;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        margin-top: 0.5rem;
+        transition: all 0.2s ease;
+    }
+
+    .auth-box input:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 4px rgba(59, 130, 246, 0.3);
+    }
+
+    img {
+        width: 8rem;
+        margin: 2rem;
+        margin-left: auto;
+        margin-right: auto;
+        display: block;
+    }
+
+    /* MOBILE RESPONSIVE */
+    @media (max-width: 768px) {
+        .participant-container {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .participant-selector {
+            width: calc(100% - 3rem);
+        }
+
+        .selection-info {
+            width: calc(100% - 3rem);
+        }
+    }
+</style>
+
+</html>

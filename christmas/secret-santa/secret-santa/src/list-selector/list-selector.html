@@ -1,0 +1,7 @@
+<p>{{title}}</p>
+@for (item of items; track item) {
+<p (click)="click(item)" [class]="{odd: $index%2==1, button: true}">
+    {{ item }}
+    <span [class]="{icon: true, selected: _selectedItem==item}">✔</span>
+</p>
+}

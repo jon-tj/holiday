@@ -1,0 +1,39 @@
+<div class="participant-container">
+  <app-list-selector [items]="PARTICIPANTS" [title]="'Who are you?'" (selectedItem)="updateSelection($event)"
+    class="participant-selector">
+  </app-list-selector>
+
+  @if(selectedParticipantData !== null && selectedParticipantData.name){
+  <div class="selection-info">
+
+    <!-- Authenticated participant -->
+    @if(selectedParticipantData.authenticated){
+    <p class="participant-name"><strong>{{ selectedParticipantData.name }}</strong></p>
+    <p>will gift to:</p>
+    <ul>
+      @for(gifter of selectedParticipantData.gifters; track gifter){
+      <li><strong>{{ gifter }}</strong></li>
+      }
+    </ul>
+
+    <div class="budget-box">
+      <p>Budget is <strong>{{ BUDGET_DETAILS.perGift }}&nbsp;kr</strong>.</p>
+      <p>This means you can spend between {{ BUDGET_DETAILS.perGiftMin }} and {{ BUDGET_DETAILS.perGiftMax }}&nbsp;kr on
+        one gift.</p>
+      <p>The combined value should not exceed <strong>{{ BUDGET_DETAILS.combinedMax }}&nbsp;kr</strong>.</p>
+    </div>
+    }
+
+    <!-- Non-authenticated participant -->
+    @if(!selectedParticipantData.authenticated){
+    <div class="auth-box">
+      <p>What's your favorite fruit?</p>
+      <input type="password" (keydown)="typeAuthField($event)" placeholder="Type here..." />
+    </div>
+    }
+
+  </div>
+  }
+</div>
+
+<img src="present.png" alt="presents" class="">
