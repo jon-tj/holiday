@@ -95,7 +95,7 @@
         combinedMax: BUDGET * drawsPerParticipant + BUDGET_MARGIN,
     }
 
-    const RANDOM_STATE = { seed: new Date().getFullYear() + 1 };
+    const RANDOM_STATE = { seed: new Date().getFullYear() ^ 12345678 };
     const draws = {};
     let authenticated = false;
 
@@ -109,18 +109,22 @@
 
 
     function ngOnInit() {
-        for (let participant of PARTICIPANTS) {
-            draws[participant] = [];
-        }
+        while (true) {
+            for (let participant of PARTICIPANTS) {
+                draws[participant] = [];
+            }
 
-        for (let participant of PARTICIPANTS) {
-            let candidateGifters = PARTICIPANTS.filter(p => (
-                draws[p].length < drawsPerParticipant
-                && p != participant
-                && !excludeList[participant].includes(p)));
-            let gifters = shuffle(candidateGifters, RANDOM_STATE).splice(0, drawsPerParticipant);
-            for (let gifter of gifters)
-                draws[gifter].push(participant);
+            for (let participant of PARTICIPANTS) {
+                let candidateGifters = PARTICIPANTS.filter(p => (
+                    draws[p].length < drawsPerParticipant
+                    && p != participant
+                    && !excludeList[participant].includes(p)));
+                let gifters = shuffle(candidateGifters, RANDOM_STATE).splice(0, drawsPerParticipant);
+                for (let gifter of gifters)
+                    draws[gifter].push(participant);
+            }
+
+            if (PARTICIPANTS.every(p => draws[p].length == drawsPerParticipant)) break;
         }
 
         for (let participant of PARTICIPANTS) {
