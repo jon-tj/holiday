@@ -43,6 +43,7 @@
     <img src="https://cdn-icons-png.flaticon.com/512/9120/9120827.png" alt="presents" class="">
     <p>Secret Santa <span id="year"></span></p>
     <p>Magic number: <span id="magic-number"></span></p>
+    <p>Magic number 2: <span id="magic-number2"></span></p>
 </body>
 
 <script>
@@ -128,10 +129,14 @@
 
             if (PARTICIPANTS.every(p => draws[p].length == drawsPerParticipant)) break;
         }
-
+        
+        let checkSum = 0;
         for (let participant of PARTICIPANTS) {
             draws[participant].sort();
+            checkSum += draws[participant].map((gifter)=>"abcdefghijklmnopqrstuvwxyzæøå".indexOf(gifter[0])).reduce((a,b)=>a+b,0);
         }
+        
+        DOM.magicNumber2.innerText = randint(1000, 9999, {seed: checkSum});
     }
 
     function updateSelection(participant) {
@@ -198,8 +203,9 @@
         giftersContainer: document.querySelector("#gifters-container"),
         year: document.querySelector('#year'),
         magicNumber: document.querySelector('#magic-number'),
+        magicNumber2: document.querySelector('#magic-number2'),
     };
-    
+
     DOM.magicNumber.innerText = randint(1000, 9999, RANDOM_STATE);
 
     function render() {
