@@ -41,6 +41,7 @@
     </div>
 
     <img src="https://cdn-icons-png.flaticon.com/512/9120/9120827.png" alt="presents" class="">
+    <p>Secret Santa <span id="year"></span></p>
 </body>
 
 <script>
@@ -195,7 +196,8 @@
         bPerGiftMax: document.querySelector("#b-perGiftMax"),
         bPerGiftMin: document.querySelector("#b-perGiftMin"),
         bCombinedMax: document.querySelector("#b-combinedMax"),
-        giftersContainer: document.querySelector("#gifters-container")
+        giftersContainer: document.querySelector("#gifters-container"),
+        year: document.querySelector('#year'),
     };
 
     function render() {
@@ -227,6 +229,8 @@
 
         // Render gifters
         DOM.giftersContainer.innerHTML = data.gifters.map(g => `<li><strong>${g}</strong></li>`).join("");
+
+        DOM.year.innerText = new Date().getFullYear();
     }
 
 
