@@ -199,6 +199,8 @@
         year: document.querySelector('#year'),
         magicNumber: document.querySelector('#magic-number'),
     };
+    
+    DOM.magicNumber.innerText = randint(1000, 9999, RANDOM_STATE);
 
     function render() {
         const data = selectedParticipantData();
@@ -231,8 +233,6 @@
         DOM.giftersContainer.innerHTML = data.gifters.map(g => `<li><strong>${g}</strong></li>`).join("");
 
         DOM.year.innerText = new Date().getFullYear();
-
-        DOM.magicNumber.innerText = randint(1000, 9999, RANDOM_STATE);
     }
 
 
