@@ -42,6 +42,7 @@
 
     <img src="https://cdn-icons-png.flaticon.com/512/9120/9120827.png" alt="presents" class="">
     <p>Secret Santa <span id="year"></span></p>
+    <p>Magic number: <span id="magic-number"></span></p>
 </body>
 
 <script>
@@ -174,16 +175,20 @@
         return a + (state.seed % (b - a + 1));
     }
 
-    function shuffle(array, state) {
+    // To be enabled for next year
+    /*function shuffle(array, state) {
         let a = structuredClone(array);
         for (let i = a.length - 1; i > 0; i--) {
             let j = randint(0, i, state);
             [a[i], a[j]] = [a[j], a[i]];
         }
         return a;
+    }*/
+
+    // ... Meanwhile use this shuffle method, which is tied to the browser-specific sorting algorithm
+    function shuffle(collection, state){
+        return structuredClone(collection).sort((_, __) => randint(0, 1, state) * 2 - 1);
     }
-
-
 
     // Cache all DOM elements in a single constant object
     const DOM = {
@@ -198,6 +203,7 @@
         bCombinedMax: document.querySelector("#b-combinedMax"),
         giftersContainer: document.querySelector("#gifters-container"),
         year: document.querySelector('#year'),
+        magicNumber: document.querySelector('#magic-number'),
     };
 
     function render() {
@@ -231,6 +237,8 @@
         DOM.giftersContainer.innerHTML = data.gifters.map(g => `<li><strong>${g}</strong></li>`).join("");
 
         DOM.year.innerText = new Date().getFullYear();
+
+        DOM.magicNumber.innerText = randint(1000, 9999);
     }
 
 
