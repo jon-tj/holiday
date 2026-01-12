@@ -1,0 +1,1 @@
+console.log("Happy Easter! Wishing you a joyful and blessed celebration.");
